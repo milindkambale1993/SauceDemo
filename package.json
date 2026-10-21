@@ -1,0 +1,27 @@
+{
+  "name": "ai-assisted-qa-assesment-saurcedemo",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Playwright TypeScript framework for the SauceDemo QA assessment.",
+  "scripts": {
+    "test": "playwright test",
+    "test:headed": "playwright test --headed",
+    "test:debug": "playwright test --debug",
+    "report": "playwright show-report"
+  },
+  "keywords": [
+    "playwright",
+    "testing",
+    "saucedemo",
+    "qa"
+  ],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "devDependencies": {
+    "@playwright/test": "^1.64.1",
+    "@types/node": "^26.6.5",
+    "playwright": "^1.64.1",
+    "typescript": "^7.0.2"
+  }
+}
