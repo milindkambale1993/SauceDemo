@@ -4,8 +4,8 @@ const dotenv=require('dotenv');
 dotenv.config();
 
 export const testCredentials ={
-  username: process.env.SAUCEDDEMO_USERNAME || 'standard_user',
-  password: process.env.SAUCEDDEMO_PASSWORD || 'secret_sauce'
+  username: process.env.SAUCEDEMO_USERNAME || 'standard_user',
+  password: process.env.SAUCEDEMO_PASSWORD || 'secret_sauce'
 };
 export default defineConfig({
   testDir: './tests',

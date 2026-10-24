@@ -20,6 +20,9 @@ jobs:
         github.event.pull_request.merged == true
       }}
     runs-on: ubuntu-latest
+    env:
+      SAUCEDEMO_USERNAME: ${{ secrets.SAUCEDEMO_USERNAME }}
+      SAUCEDEMO_PASSWORD: ${{ secrets.SAUCEDEMO_PASSWORD }}
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
