@@ -1,4 +1,5 @@
 import { test, expect } from './fixtures';
+import{testCredentials} from '../playwright.config'
 
 
 test.describe('SauceDemo purchase flow', () => {
@@ -9,7 +10,7 @@ test.describe('SauceDemo purchase flow', () => {
     checkoutPage,}) => {
       
     await loginPage.goto();
-    await loginPage.login('standard_user', 'secret_sauce');
+    await loginPage.login(testCredentials.username, testCredentials.password);
 
     await expect(page).toHaveURL(/\/inventory\.html/);
     await expect(inventoryPage.title).toBeVisible();
