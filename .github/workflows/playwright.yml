@@ -1,0 +1,112 @@
+name: Playwright tests and report
+
+on:
+  push:
+  pull_request:
+    types: [opened, synchronize, reopened, closed]
+  schedule:
+    - cron: '30 2 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    if: >-
+      ${{
+        github.event_name != 'pull_request' ||
+        github.event.action != 'closed' ||
+        github.event.pull_request.merged == true
+      }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Playwright Chromium
+        run: npx playwright install --with-deps chromium
+
+      - name: Run Playwright tests
+        id: playwright-tests
+        run: npm test
+
+      - name: Upload Playwright report
+        id: upload-report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: playwright-report/
+          if-no-files-found: warn
+          retention-days: 14
+
+      - name: Add report link to run summary
+        if: always()
+        env:
+          REPORT_URL: ${{ steps.upload-report.outputs.artifact-url }}
+          TEST_OUTCOME: ${{ steps.playwright-tests.outcome }}
+        run: |
+          {
+            echo "## Playwright test result"
+            echo "Test step outcome: **${TEST_OUTCOME:-not completed}**"
+            echo
+          } >> "$GITHUB_STEP_SUMMARY"
+
+          if [[ -n "$REPORT_URL" ]]; then
+            {
+              echo "## Playwright report"
+              echo "[Download the HTML report]($REPORT_URL)"
+              echo
+              echo "Download and extract the artifact, then open \`index.html\`."
+              echo "The artifact is retained for 14 days and requires repository access."
+            } >> "$GITHUB_STEP_SUMMARY"
+          else
+            {
+              echo "## Playwright report"
+              echo "The report artifact was not created. Check the test and upload steps for details."
+            } >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+  publish-report:
+    needs: test
+    if: >-
+      ${{
+        always() &&
+        !cancelled() &&
+        (github.event_name == 'push' || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch') &&
+        github.ref == format('refs/heads/{0}', github.event.repository.default_branch) &&
+        (needs.test.result == 'success' || needs.test.result == 'failure')
+      }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Download Playwright report
+        uses: actions/download-artifact@v4
+        with:
+          name: playwright-report
+          path: playwright-report
+
+      - name: Upload report for GitHub Pages
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: playwright-report
+
+      - name: Deploy report to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

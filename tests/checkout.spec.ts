@@ -1,18 +1,16 @@
-import { test, expect } from '@playwright/test';
-import { LoginPage } from '../pages/loginPage';
-import { InventoryPage } from '../pages/inventoryPage';
-import { CartPage } from '../pages/cartPage';
-import { CheckoutPage } from '../pages/checkoutPage';
+import { test, expect } from './fixtures';
+import{testCredentials} from '../playwright.config'
+
 
 test.describe('SauceDemo purchase flow', () => {
-  test('standard user can log in and complete checkout', async ({ page }) => {
-    const loginPage = new LoginPage(page);
-    const inventoryPage = new InventoryPage(page);
-    const cartPage = new CartPage(page);
-    const checkoutPage = new CheckoutPage(page);
-
+  test('standard user can log in and complete checkout', async ({ page,
+    loginPage,
+    inventoryPage,
+    cartPage,
+    checkoutPage,}) => {
+      
     await loginPage.goto();
-    await loginPage.login('standard_user', 'secret_sauce');
+    await loginPage.login(testCredentials.username, testCredentials.password);
 
     await expect(page).toHaveURL(/\/inventory\.html/);
     await expect(inventoryPage.title).toBeVisible();
